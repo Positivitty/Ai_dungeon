@@ -1,0 +1,43 @@
+# Python
+__pycache__/
+*.py[cod]
+*.so
+.Python
+env/
+venv/
+ENV/
+build/
+dist/
+.eggs/
+*.egg-info/
+*.egg
+pip-wheel-metadata/
+
+# macOS
+.DS_Store
+
+# VSCode
+.vscode/
+
+# Pytest
+.cache/
+
+# virtualenv
+venv/
+
+# user-specific
+*.env
+.venv
+
+# Jupyter
+.ipynb_checkpoints/
+
+# IDEs and editors
+*.swp
+*~
+
+# Logs
+*.log
+
+# Outputs
+outputs/
