@@ -1,6 +1,0 @@
-# AI Dungeon Crawler - Requirements
-pygame==2.5.2
-gymnasium==0.29.1
-stable-baselines3==2.1.0
-torch==2.1.0
-numpy==1.24.3
