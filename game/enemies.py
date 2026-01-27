@@ -5,6 +5,7 @@ Enemy classes with AI behavior and wall collision
 import pygame
 import math
 from config import *
+from game.graphics import draw_rounded_rect, draw_gradient_rect, draw_shadow, draw_glow, draw_health_bar
 
 class Enemy:
     """Base enemy class"""
@@ -187,24 +188,54 @@ class Enemy:
         """Get pygame Rect for collision"""
         return pygame.Rect(self.x, self.y, self.width, self.height)
     
-    def draw(self, surface):
-        """Draw enemy"""
-        # Draw enemy as colored rectangle
-        pygame.draw.rect(surface, self.color, self.get_rect())
-        
-        # Draw health bar above enemy
-        bar_width = self.width
-        bar_height = 4
-        bar_x = self.x
-        bar_y = self.y - 8
-        
-        # Background (red)
-        pygame.draw.rect(surface, RED, (bar_x, bar_y, bar_width, bar_height))
-        
-        # Health (green)
-        if self.max_hp > 0:
-            health_width = int((self.hp / self.max_hp) * bar_width)
-            pygame.draw.rect(surface, GREEN, (bar_x, bar_y, health_width, bar_height))
+    def draw(self, surface, flash=None):
+        """Draw enemy with modern visuals"""
+        # Get enemy-specific colors
+        colors = ENEMY_COLORS.get(self.enemy_type, {
+            'primary': self.color,
+            'secondary': tuple(max(0, c - 40) for c in self.color),
+            'glow': self.color,
+            'letter': '?'
+        })
+
+        rect = self.get_rect()
+
+        # Draw shadow
+        draw_shadow(surface, rect, offset=(3, 3), blur_radius=5, alpha=70)
+
+        # Draw glow when in attack state
+        if self.state == 'attack':
+            draw_glow(surface, rect, colors['glow'], intensity=40, radius=8)
+
+        # Draw main body with gradient
+        draw_gradient_rect(surface, colors['primary'], colors['secondary'], rect, radius=CORNER_RADIUS)
+
+        # Draw border
+        border_color = colors['glow'] if self.state == 'attack' else tuple(max(0, c - 30) for c in colors['primary'])
+        draw_rounded_rect(surface, (0, 0, 0, 0), rect, CORNER_RADIUS,
+                         border=2, border_color=border_color)
+
+        # Draw type indicator letter
+        font = pygame.font.Font(None, 28)
+        letter = colors.get('letter', self.enemy_type[0].upper())
+        letter_surface = font.render(letter, True, (255, 255, 255))
+        letter_rect = letter_surface.get_rect(center=(rect.centerx, rect.centery))
+        surface.blit(letter_surface, letter_rect)
+
+        # Apply flash overlay if provided
+        if flash and flash.active:
+            flash.draw(surface, rect)
+
+        # Draw modern health bar above enemy
+        bar_width = self.width + 6
+        bar_height = 6
+        bar_x = self.x - 3
+        bar_y = self.y - 12
+
+        draw_health_bar(surface, bar_x, bar_y, bar_width, bar_height,
+                       self.hp, self.max_hp,
+                       bar_color_full=(100, 255, 100), bar_color_empty=(255, 80, 80),
+                       bg_color=(30, 30, 40), border_color=(60, 60, 80), radius=3)
 
 
 class Boss(Enemy):
@@ -287,30 +318,87 @@ class Boss(Enemy):
             # Heavy attack does double damage
             player.take_damage(self.damage * 2)
     
-    def draw(self, surface):
-        """Draw boss"""
-        # Draw boss rectangle
-        boss_color = self.color
-        
-        # Flash red when charging heavy attack
+    def draw(self, surface, flash=None):
+        """Draw boss with enhanced visuals"""
+        # Get boss-specific colors
+        colors = BOSS_COLORS.get(self.enemy_type, {
+            'primary': self.color,
+            'secondary': tuple(max(0, c - 40) for c in self.color),
+            'glow': self.color,
+            'charge_glow': RED,
+            'letter': 'B'
+        })
+
+        rect = self.get_rect()
+
+        # Draw larger shadow for boss
+        draw_shadow(surface, rect, offset=(5, 5), blur_radius=10, alpha=100)
+
+        # Draw intense glow when charging
         if self.charging_heavy:
-            boss_color = RED
-        
-        pygame.draw.rect(surface, boss_color, self.get_rect())
-        
-        # Draw health bar
-        bar_width = self.width
-        bar_height = 6
-        bar_x = self.x
-        bar_y = self.y - 12
-        
-        pygame.draw.rect(surface, RED, (bar_x, bar_y, bar_width, bar_height))
-        
-        if self.max_hp > 0:
-            health_width = int((self.hp / self.max_hp) * bar_width)
-            pygame.draw.rect(surface, GREEN, (bar_x, bar_y, health_width, bar_height))
-        
+            draw_glow(surface, rect, colors['charge_glow'], intensity=80, radius=15)
+        else:
+            # Normal glow for boss presence
+            draw_glow(surface, rect, colors['glow'], intensity=30, radius=10)
+
+        # Determine body color
+        if self.charging_heavy:
+            # Pulse between normal and red during charge
+            charge_progress = self.heavy_attack_charge
+            primary = tuple(int(colors['primary'][i] + (255 - colors['primary'][i]) * charge_progress * 0.5)
+                          for i in range(3))
+            secondary = tuple(int(colors['secondary'][i] + (100 - colors['secondary'][i]) * charge_progress * 0.5)
+                            for i in range(3))
+        else:
+            primary = colors['primary']
+            secondary = colors['secondary']
+
+        # Draw main body with gradient
+        draw_gradient_rect(surface, primary, secondary, rect, radius=CORNER_RADIUS + 2)
+
+        # Draw border
+        border_color = colors['charge_glow'] if self.charging_heavy else colors['glow']
+        draw_rounded_rect(surface, (0, 0, 0, 0), rect, CORNER_RADIUS + 2,
+                         border=3, border_color=border_color)
+
+        # Draw boss letter indicator
+        font = pygame.font.Font(None, 48)
+        letter = colors.get('letter', 'B')
+        letter_surface = font.render(letter, True, (255, 255, 255))
+        letter_rect = letter_surface.get_rect(center=(rect.centerx, rect.centery))
+        surface.blit(letter_surface, letter_rect)
+
+        # Apply flash overlay if provided
+        if flash and flash.active:
+            flash.draw(surface, rect)
+
+        # Draw modern health bar
+        bar_width = self.width + 10
+        bar_height = 10
+        bar_x = self.x - 5
+        bar_y = self.y - 18
+
+        draw_health_bar(surface, bar_x, bar_y, bar_width, bar_height,
+                       self.hp, self.max_hp,
+                       bar_color_full=(100, 255, 100), bar_color_empty=(255, 80, 80),
+                       bg_color=(30, 30, 40), border_color=(80, 80, 100), radius=5)
+
         # Draw charge indicator if charging
         if self.charging_heavy:
-            charge_width = int((self.heavy_attack_charge / 1.0) * bar_width)
-            pygame.draw.rect(surface, YELLOW, (bar_x, bar_y - 8, charge_width, 4))
+            charge_bar_width = self.width + 10
+            charge_bar_height = 6
+            charge_x = self.x - 5
+            charge_y = self.y - 28
+
+            # Background
+            draw_rounded_rect(surface, (40, 40, 50), (charge_x, charge_y, charge_bar_width, charge_bar_height), 3)
+
+            # Charge fill
+            charge_fill_width = int(charge_bar_width * (self.heavy_attack_charge / 1.0))
+            if charge_fill_width > 0:
+                draw_gradient_rect(surface, (255, 200, 50), (255, 100, 50),
+                                  (charge_x, charge_y, charge_fill_width, charge_bar_height), radius=3)
+
+            # Border
+            draw_rounded_rect(surface, (0, 0, 0, 0), (charge_x, charge_y, charge_bar_width, charge_bar_height), 3,
+                             border=1, border_color=(255, 200, 100))

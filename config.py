@@ -61,6 +61,102 @@ UI_BORDER = (80, 80, 80)
 UI_HIGHLIGHT = CYAN
 UI_TEXT = WHITE
 
+# Modern UI - Gradient Colors (top, bottom pairs)
+GRADIENT_PANEL = ((45, 45, 55), (25, 25, 35))
+GRADIENT_HEADER = ((60, 60, 80), (40, 40, 55))
+GRADIENT_BUTTON = ((70, 70, 90), (50, 50, 65))
+GRADIENT_BUTTON_HOVER = ((90, 90, 120), (70, 70, 95))
+
+# Modern UI - Health/Stat Bar Gradients
+HEALTH_BAR_FULL = (50, 255, 120)
+HEALTH_BAR_EMPTY = (255, 60, 60)
+MANA_BAR_COLOR = (80, 150, 255)
+XP_BAR_COLOR = (180, 120, 255)
+
+# Player Colors by Class (primary, secondary, glow)
+PLAYER_COLORS = {
+    'warrior': {
+        'primary': (80, 120, 255),
+        'secondary': (40, 70, 180),
+        'glow': (100, 150, 255),
+        'indicator': (150, 180, 255)
+    },
+    'rogue': {
+        'primary': (80, 220, 120),
+        'secondary': (40, 150, 70),
+        'glow': (100, 255, 140),
+        'indicator': (140, 255, 180)
+    },
+    'mage': {
+        'primary': (180, 100, 255),
+        'secondary': (120, 50, 200),
+        'glow': (200, 140, 255),
+        'indicator': (220, 180, 255)
+    },
+    'paladin': {
+        'primary': (255, 210, 80),
+        'secondary': (200, 160, 40),
+        'glow': (255, 230, 120),
+        'indicator': (255, 240, 180)
+    }
+}
+
+# Enemy Colors by Type (primary, secondary, glow)
+ENEMY_COLORS = {
+    'goblin': {
+        'primary': (220, 80, 80),
+        'secondary': (160, 50, 50),
+        'glow': (255, 100, 100),
+        'letter': 'G'
+    },
+    'skeleton': {
+        'primary': (220, 220, 220),
+        'secondary': (160, 160, 160),
+        'glow': (255, 255, 255),
+        'letter': 'S'
+    },
+    'goblin_archer': {
+        'primary': (255, 180, 80),
+        'secondary': (200, 130, 40),
+        'glow': (255, 200, 120),
+        'letter': 'A'
+    },
+    'slime': {
+        'primary': (80, 220, 80),
+        'secondary': (40, 160, 40),
+        'glow': (120, 255, 120),
+        'letter': 'L'
+    }
+}
+
+# Boss Colors
+BOSS_COLORS = {
+    'dark_knight': {
+        'primary': (100, 50, 180),
+        'secondary': (60, 20, 120),
+        'glow': (150, 80, 255),
+        'charge_glow': (255, 50, 50),
+        'letter': 'B'
+    }
+}
+
+# Particle Colors
+PARTICLE_COLORS = {
+    'attack': [(255, 255, 200), (255, 220, 100), (255, 180, 50)],
+    'damage': [(255, 80, 80), (255, 120, 120), (200, 40, 40)],
+    'heal': [(100, 255, 150), (150, 255, 180), (200, 255, 220)],
+    'death': [(255, 100, 100), (255, 150, 150), (200, 50, 50)],
+    'pickup': [(150, 255, 150), (180, 255, 200), (255, 255, 255)]
+}
+
+# Visual Constants
+CORNER_RADIUS = 8
+CORNER_RADIUS_SMALL = 4
+SHADOW_OFFSET = (3, 3)
+SHADOW_ALPHA = 80
+GLOW_INTENSITY = 40
+GLOW_RADIUS = 8
+
 # Player Settings
 PLAYER_SPEED = 4
 PLAYER_MAX_HP = 100
