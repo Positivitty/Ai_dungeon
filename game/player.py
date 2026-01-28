@@ -6,7 +6,6 @@ Handles player state, equipment, stats, and inventory
 import pygame
 from config import *
 from game.character import RACES, CLASSES, WEAPONS, ARMORS, can_equip_weapon, can_equip_armor
-from game.graphics import draw_rounded_rect, draw_gradient_rect, draw_shadow, draw_glow, draw_health_bar
 
 class Player:
     """Player character with race/class system"""
@@ -261,55 +260,34 @@ class Player:
         dy = enemy.y - self.y
         return math.sqrt(dx*dx + dy*dy)
     
-    def draw(self, surface, flash=None):
+    def draw(self, surface):
         """
-        Draw player to surface with modern visuals
-
+        Draw player to surface
+        
         Args:
             surface: pygame Surface to draw on
-            flash: Optional FlashAnimation for damage effect
         """
-        # Get class-specific colors
-        colors = PLAYER_COLORS.get(self.character_class, PLAYER_COLORS['warrior'])
-        self.color = colors['primary']
-
-        rect = self.get_rect()
-
-        # Draw shadow
-        draw_shadow(surface, rect, offset=(4, 4), blur_radius=6, alpha=80)
-
-        # Draw main body with gradient
-        draw_gradient_rect(surface, colors['primary'], colors['secondary'], rect, radius=CORNER_RADIUS)
-
-        # Draw border
-        draw_rounded_rect(surface, (0, 0, 0, 0), rect, CORNER_RADIUS,
-                         border=2, border_color=colors['glow'])
-
-        # Draw facing direction indicator
-        indicator_size = 8
-        if self.facing == 'right':
-            indicator_x = rect.right - indicator_size - 4
-        else:
-            indicator_x = rect.left + 4
-        indicator_y = rect.centery - indicator_size // 2
-
-        pygame.draw.polygon(surface, colors['indicator'], [
-            (indicator_x + (indicator_size if self.facing == 'right' else 0), indicator_y + indicator_size // 2),
-            (indicator_x + (0 if self.facing == 'right' else indicator_size), indicator_y),
-            (indicator_x + (0 if self.facing == 'right' else indicator_size), indicator_y + indicator_size)
-        ])
-
-        # Apply flash overlay if provided
-        if flash and flash.active:
-            flash.draw(surface, rect)
-
-        # Draw modern health bar above player
-        bar_width = self.width + 10
-        bar_height = 8
-        bar_x = self.x - 5
-        bar_y = self.y - 14
-
-        draw_health_bar(surface, bar_x, bar_y, bar_width, bar_height,
-                       self.hp, self.max_hp,
-                       bar_color_full=HEALTH_BAR_FULL, bar_color_empty=HEALTH_BAR_EMPTY,
-                       bg_color=(30, 30, 40), border_color=(60, 60, 80), radius=4)
+        # Different colors based on class
+        class_colors = {
+            'warrior': (100, 100, 255),  # Blue
+            'rogue': (100, 255, 100),    # Green
+            'mage': (200, 100, 255),     # Purple
+            'paladin': (255, 215, 0)     # Gold
+        }
+        self.color = class_colors.get(self.character_class, BLUE)
+        
+        # Simple colored rectangle
+        pygame.draw.rect(surface, self.color, self.get_rect())
+        
+        # Draw health bar above player
+        bar_width = self.width
+        bar_height = 4
+        bar_x = self.x
+        bar_y = self.y - 8
+        
+        # Background (red)
+        pygame.draw.rect(surface, RED, (bar_x, bar_y, bar_width, bar_height))
+        
+        # Health (green)
+        health_width = int((self.hp / self.max_hp) * bar_width)
+        pygame.draw.rect(surface, GREEN, (bar_x, bar_y, health_width, bar_height))
